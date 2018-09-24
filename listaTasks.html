@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta id="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Lista de tasks</title>
+        <script>
+
+            const carregarlistTasks = () => {
+                const xhttp = new XMLHttpRequest()
+                const tablebody = document.getElementById("listTaskBody")
+                document.getElementById("table").hidden = false
+                document.getElementById("tableLink").hidden = false
+
+                const newLines = document.getElementById("newLines")
+                const repairLines = document.getElementById("repairLines")
+                const cancelLines = document.getElementById("cancelLines")
+
+                const request = {
+                    queues: []
+                }
+
+                if (newLines.checked) { request.queues.push("NewLines") }
+
+                if (repairLines.checked) { request.queues.push("RepairLine") }
+
+                if (cancelLines.checked) { request.queues.push("CancelLine") }
+
+                const stringfiedRequest = JSON.stringify(request)
+
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        const dados = JSON.parse(this.responseText)
+                        let tasks = dados.task
+                        tablebody.innerHTML = ""
+                        if (tasks && tasks.length) {
+                            for (let i = 0; i < tasks.length; i++) {
+                                let actualTask = JSON.parse(tasks[i])
+                                console.log(actualTask)
+                                tablebody.innerHTML += `
+                                <tr id="${i + 1}">
+                                    <td style="padding:10px">${i + 1}</td>
+                                    <td style="padding:10px">${actualTask.id}</td>
+                                    <td style="padding:10px">${actualTask.tipoTask}</td>
+                                    <td style="padding:10px">${actualTask.descricao}</td>
+                                    <td style="padding:10px"><button type="button" onclick="setResolved('${actualTask.id}', '${actualTask.tipoTask}', '${actualTask.descricao}', ${i + 1})">Marcar Resolvida</button></td>
+                                </tr>
+                            `
+                            }
+                        } else {
+                            tablebody.innerHTML = `
+                                <tr>
+                                    <td style="padding:10px" colspan="5">Nenhuma task ainda</td>
+                                </tr>
+                            `
+                        }
+                    }
+                }
+
+                xhttp.open("POST", `http://localhost:8000/task/getToProcess/`, true)
+                xhttp.send(stringfiedRequest)
+            }
+
+            const setResolved = (id, type, description, position) => {
+                const xhttp = new XMLHttpRequest()
+                const tablebody = document.getElementById("listTaskBody")
+
+                const request = {
+                    id: id,
+                    tipoTask: type,
+                    descricao: description
+                }
+
+                const stringfiedRequest = JSON.stringify(request)
+
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        tablebody.querySelector("tr:nth-child(" + position + ")").hidden = true
+                        alert("task Concluida")
+                    }
+                }
+
+                xhttp.open("POST", `http://localhost:8000/task/setResolved/`, true)
+                xhttp.send(stringfiedRequest)
+            }
+        </script>
+
+    </head>
+
+    <body>
+        <h1>Lista de tasks pra você</h1>
+        <label>Seu Nome</label>
+        <br>
+        <input type="text" id="nome">
+        <br>
+        <br>
+
+        <label>Quais tasks você vai tratar?</label>
+        <br>
+        <label>
+            <input type="checkbox" id="newLines"> Novas Linhas</label>
+        <label>
+            <input type="checkbox" id="repairLines"> Reparo de linha</label>
+        <label>
+            <input type="checkbox" id="cancelLines"> Cancelamento de linha</label>
+        <br>
+        <br>
+
+        <button type="button" onclick="carregarlistTasks()">Enviar Requisição</button>
+        <br>
+        <br>
+
+        <a href="newTask.html">voltar pagina inicial</a>
+        <table border="1" id="table" hidden="true">
+            <thead>
+                <tr>
+                    <th style="padding:10px">#</th>
+                    <th style="padding:10px">nome</th>
+                    <th style="padding:10px">tipo</th>
+                    <th style="padding:10px">descricao</th>
+                    <th style="padding:10px">ação</th>
+                </tr>
+            </thead>
+            <tbody id="listTaskBody">
+                <tr>
+                    <td style="padding:10px" colspan="5">Procurando por dados...</td>
+                </tr>
+            </tbody>
+        </table>
+        <a hidden="true" id="tableLink" href="newTask.html">voltar pagina inicial</a>
+    </body>
+
+</html>

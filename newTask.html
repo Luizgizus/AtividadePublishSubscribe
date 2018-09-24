@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Nova Task</title>
+
+        <script>
+
+            const sendNewTask = () => {
+                const xhttp = new XMLHttpRequest()
+                const nome = document.getElementById("nome").value
+                const tipoTask = document.getElementById("tipoTask").value
+                const descricao = document.getElementById("descricao").value
+
+                const request = {
+                    id: nome,
+                    tipoTask: tipoTask,
+                    descricao: descricao
+                }
+                const stringfiedRequest = JSON.stringify(request)
+
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        alert("Tarefa cadastrada com sucesso")
+                        window.location.reload()
+                    }
+                }
+
+                xhttp.open("POST", `http://localhost:8000/task/setOnQueue/`, true)
+                xhttp.send(stringfiedRequest)
+            }
+
+        </script>
+
+    </head>
+
+    <body>
+        <h1>Criando uma nova task</h1>
+
+        <label>Seu Nome</label>
+        <br>
+        <input type="text" id="nome">
+        <br>
+        <br>
+
+        <label>Tipo da task</label>
+        <br>
+        <select id="tipoTask">
+            <option value="">Selecione um tipo</option>
+            <option value="1">Nova Linha</option>
+            <option value="2">Reparo de linha</option>
+            <option value="3">Cancelamento de linha</option>
+        </select>
+        <br>
+        <br>
+
+        <label>Descrição</label>
+        <br>
+        <textarea id="descricao" cols="30" rows="10"></textarea>
+        <br>
+        <br>
+
+        <button type="button" onclick="sendNewTask()">Enviar Requisição</button>
+    </body>
+
+</html>
